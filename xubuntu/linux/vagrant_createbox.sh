@@ -41,7 +41,7 @@ done
 ##################
 
 echo "Executing post install scripts."
-vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/script/vagrant.sh"
+vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
 vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '/tmp/vagrant.sh'
 vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/rm' -- arg0 '/tmp/vagrant.sh'
 
