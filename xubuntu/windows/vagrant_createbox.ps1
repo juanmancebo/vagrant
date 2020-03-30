@@ -1,4 +1,4 @@
-$VM="xubuntu_18042"
+$VM="xubuntu_1804"
 $ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
 $VBOXMANAGE="C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 
@@ -44,12 +44,12 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 }
 
 
-& $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp arg1 "https://raw.githubusercontent.com/juanmancebo/vagrant/master/xubuntu/vagrant.sh"
+& $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp arg1 "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/bin/bash' -- arg0 '/tmp/vagrant.sh'
 & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/bin/rm' -- arg0 '/tmp/vagrant.sh'
 
-#rm "$VM.box" -ea ig
+rm "$VM.box" -ea ig
 vagrant package --base $VM --output "$VM.box" $VM
-#& $VBOXMANAGE unregistervm $VM --delete
-#rm "$HOME\VirtualBox VMs\$VM" -r -ea ig
+& $VBOXMANAGE unregistervm $VM --delete
+rm "$HOME\VirtualBox VMs\$VM" -r -ea ig
 vagrant box add "$VM.box" --name $VM --force
