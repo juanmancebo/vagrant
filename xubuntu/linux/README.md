@@ -1,26 +1,26 @@
 
-## Give permissions to execute script
+### Give permissions to execute script
 ```
 chmod +x vagrant_createbox.sh
 ```
 
-## Create vagrant box
+### Create vagrant box
 ```
 ./vagrant_createbox.sh
 ```
 
-## VM provision and run
+### VM provision and run
 ```
 cd ..
 vagrant up
 ```
 
-## SSH access
+### SSH access
 ```
 vagrant ssh
 ```
 
-## GUI mode access
+### GUI mode access
 | Default user     | Default password |
 | ---      | ---       |
 | vagrant | vagrant       |

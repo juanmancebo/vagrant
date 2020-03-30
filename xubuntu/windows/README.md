@@ -1,27 +1,27 @@
 
-## Give permissions to execute script
+### Give permissions to execute script
 ```
 Set-ExecutionPolicy Unrestricted -Scope CurrentUser
 Unblock-File -Path vagrant_createbox.ps1
 ```
 
-## Create vagrant box
+### Create vagrant box
 ```
 .\vagrant_createbox.ps1
 ```
 
-## VM provision and run
+### VM provision and run
 ```
 cd ..
 vagrant up
 ```
 
-## SSH access
+### SSH access
 ```
 vagrant ssh
 ```
 
-## GUI mode access
+### GUI mode access
 | Default user     | Default password |
 | ---      | ---       |
 | vagrant | vagrant       |
