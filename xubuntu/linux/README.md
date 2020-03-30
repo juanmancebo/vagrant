@@ -1,13 +1,12 @@
 
 ## Give permissions to execute script
 ```
-Set-ExecutionPolicy Unrestricted -Scope CurrentUser
-Unblock-File -Path vagrant_createbox.ps1
+chmod +x vagrant_createbox.sh
 ```
 
 ## Create vagrant box
 ```
-.\vagrant_createbox.ps1
+./vagrant_createbox.sh
 ```
 
 ## VM provision and run
