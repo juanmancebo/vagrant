@@ -48,5 +48,5 @@ vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/r
 if [ -f ${VM}.box ];then echo "Box file ${VM}.box already exists. Removing..." && rm -f ${VM}.box;fi
 vagrant package --base $VM --output ${VM}.box $VM
 vboxmanage unregistervm ${VM} --delete
-rm -rf ../VirtualBox\ VMs/${VM}
+rm -rf  ~/VirtualBox\ VMs/${VM}
 vagrant box add ${VM}.box --name $VM --force
