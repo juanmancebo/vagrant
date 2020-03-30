@@ -34,7 +34,8 @@ Vagrant.configure("2") do |config|
   # SSH port
    config.vm.network "forwarded_port", guest: 22, host: 2222
    config.ssh.insert_key = true
-
+   config.ssh.username = "vagrant"
+   config.ssh.password = "vagrant"
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
@@ -232,7 +233,7 @@ echo 'source <(kubectl completion bash)' >>~/.bashrc
 helm_version=helm-v3.1.2-linux-amd64.tar.gz
 sudo curl -L https://get.helm.sh/$helm_version -o /tmp/$helm_version
 sudo tar -zxvf /tmp/$helm_version -C /tmp
-sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm3
+sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm
 helm3 repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 #rancher cli install
