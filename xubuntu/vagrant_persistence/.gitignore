@@ -1,0 +1,7 @@
+# Blacklist files/folders in same directory as the .gitignore file
+/*
+
+# Whitelist some files
+!.gitignore
+!start_apps.sh
+!README.md

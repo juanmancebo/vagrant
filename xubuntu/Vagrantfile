@@ -1,0 +1,249 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  config.vm.define "xubuntu_1804" do |v|
+    v.vm.box = "xubuntu_1804"
+  end
+  config.vm.hostname = "xubuntu"
+  #config.disksize.size = '20GB'
+  config.vm.provider "virtualbox" do |v|
+    v.name = "xubuntu_1804"
+  end
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  #
+  # SSH port
+   config.vm.network "forwarded_port", guest: 22, host: 2222
+   config.ssh.insert_key = true
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder "./vagrant_persistence", "/vagrant", :mount_options => ["dmode=755","fmode=700"] ##pending to test fmode=700
+
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+   config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+     vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+     vb.memory = "4096"
+     ##Modifyvm => https://www.virtualbox.org/manual/ch08.html
+     vb.customize ["modifyvm", :id, "--vram", 128]
+     vb.customize ["modifyvm", :id, "--monitorcount", 1]
+     #USB 2.0 controller
+     vb.customize ["modifyvm", :id, "--usb", "on", "--usbehci", "on"]
+     audio_driver = case RUBY_PLATFORM
+       when /linux/
+         "alsa"
+       when /darwin/
+         "coreaudio"
+       when /mswin|mingw|cygwin/
+         "dsound"
+       else
+         raise "Unknown RUBY_PLATFORM=#{RUBY_PLATFORM}"
+       end
+     vb.customize ["modifyvm", :id, "--audio", audio_driver, "--audiocontroller", "ac97"]
+     vb.customize ["modifyvm", :id, "--audioout", "on"]
+     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+
+   end
+
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+   config.vm.provision "shell", inline: <<-SHELL
+     #configure localtime
+     timedatectl set-timezone Europe/Madrid
+
+     echo $(date)": Provisioning started" |tee /vagrant/vagrant_provision.log
+
+     echo "==> Disabling unattended upgrades"
+     echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean false| debconf-set-selections
+     dpkg-reconfigure -f noninteractive unattended-upgrades
+
+     echo "checking dpkg locks"
+     lsof /var/lib/dpkg/lock-frontend
+
+     #configuring repos
+     echo "Configuring repos..."
+     DEBIAN_FRONTEND=noninteractive apt-get install -y curl
+     curl -s http://mirrors.ubuntu.com/mirrors.txt >/tmp/mirrors.txt && repos=$(cat /tmp/mirrors.txt|cut -d / -f3) && for repo in $repos ;do echo -e "\n$repo $(ping -q -c 2 -W 1 -i 0.5 $repo |tail -1|awk -F/ '{print $6}')";done |egrep [0-9][0-9].[0-9][0-9][0-9] |sort -k2n
+     fastesthost=$(echo $repos|head -1|cut -d " " -f1)
+     fastestrepo=$(grep $fastesthost /tmp/mirrors.txt)
+     mv /etc/apt/sources.list{,_default}
+     echo "deb $fastestrepo $(lsb_release -cs) main restricted" >/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-updates main restricted" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs) universe" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-updates universe" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs) multiverse" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-updates multiverse" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-backports main restricted universe multiverse" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-security main restricted" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-security universe" >>/etc/apt/sources.list
+     echo "deb $fastestrepo $(lsb_release -cs)-security multiverse" >>/etc/apt/sources.list
+
+     DEBIAN_FRONTEND=noninteractive apt-get update
+     apt-get install -y apt-transport-https ca-certificates gnupg-agent software-properties-common
+     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add -
+     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+     DEBIAN_FRONTEND=noninteractive apt-get update
+     DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io
+     #install tools
+     DEBIAN_FRONTEND=noninteractive apt-get install -y vim git terminator tmux libreoffice pidgin mlocate traceroute whois python-pip shutter keychain cifs-utils keepassxc p7zip-full jq ldap-utils
+     #rocketchat desktop client
+     DEBIAN_FRONTEND=noninteractive snap install rocketchat-desktop
+     #https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/2.17.7/rocketchat_2.17.7_amd64.deb
+     #cloudformation linter
+     DEBIAN_FRONTEND=noninteractive pip install cfn-lint
+     #install google-chrome. https://www.google.com/linuxrepositories/
+     wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add -
+     echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
+     DEBIAN_FRONTEND=noninteractive apt-get update
+     DEBIAN_FRONTEND=noninteractive apt-get install -y google-chrome-stable
+     #install sublime-text. https://www.sublimetext.com/docs/3/linux_repositories.html#apt
+     wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add -
+     echo "deb https://download.sublimetext.com/ apt/stable/" | tee /etc/apt/sources.list.d/sublime-text.list
+     DEBIAN_FRONTEND=noninteractive apt-get update
+     DEBIAN_FRONTEND=noninteractive apt-get install -y sublime-text
+   SHELL
+
+
+   config.vm.provision "shell", privileged: false, inline: <<-EOC
+#set keyboard layout to Spanish
+xfconf-query -c keyboard-layout -p /Default/XkbDisable -s false --create --type bool
+xfconf-query -c keyboard-layout -p /Default/XkbLayout -s es --create --type string
+
+
+mkdir -p /home/vagrant/.config/autostart
+cat <<-'EOF' > /home/vagrant/.config/autostart/start.desktop
+[Desktop Entry]
+Type=Application
+Exec=timeout 120 bash /vagrant/start_apps.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[C]=start_apps
+Name=start_apps
+Comment[C]=Script to run required aplications
+Comment=Script to run required aplications
+EOF
+
+
+#disable gnome-keyring-ssh because keychain is used.
+cat <<-'EOF' > /home/vagrant/.config/autostart/gnome-keyring-ssh.desktop
+[Desktop Entry]
+Type=Application
+Name=SSH Key Agent
+Comment=GNOME Keyring: SSH Agent
+Exec=/usr/bin/gnome-keyring-daemon --start --components=ssh
+OnlyShowIn=GNOME;Unity;MATE;
+X-GNOME-Autostart-Phase=PreDisplayServer
+X-GNOME-AutoRestart=false
+X-GNOME-Autostart-Notify=true
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=gnome-keyring
+X-GNOME-Bugzilla-Component=general
+X-GNOME-Bugzilla-Version=3.28.0.2
+X-Ubuntu-Gettext-Domain=gnome-keyring
+X-GNOME-Autostart-enabled=false
+EOF
+
+
+mkdir -p /home/vagrant/.config/terminator
+cat <<-'EOF' > /home/vagrant/.config/terminator/config
+[global_config]
+[keybindings]
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+[plugins]
+[profiles]
+  [[default]]
+    cursor_color = "#aaaaaa"
+    scrollback_infinite = True
+EOF
+
+
+#aws cli install
+cd /tmp
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+#kubectl install
+#sudo apt-get update && sudo apt-get install -y apt-transport-https
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo DEBIAN_FRONTEND=noninteractive apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kubectl=1.16.7-00
+#enable kubectl autocompletion
+echo 'source <(kubectl completion bash)' >>~/.bashrc
+
+#helm3 install
+helm_version=helm-v3.1.2-linux-amd64.tar.gz
+sudo curl -L https://get.helm.sh/$helm_version -o /tmp/$helm_version
+sudo tar -zxvf /tmp/$helm_version -C /tmp
+sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm3
+helm3 repo add stable https://kubernetes-charts.storage.googleapis.com/
+
+#rancher cli install
+sudo curl -L https://github.com/rancher/cli/releases/download/v2.3.2/rancher-linux-amd64-v2.3.2.tar.gz -o /tmp/rancher-cli.tar.gz
+sudo tar xvfz /tmp/rancher-cli.tar.gz -C /tmp
+sudo mv /tmp/rancher*/rancher /usr/local/bin/
+sudo chmod +x /usr/local/bin/rancher
+
+echo $(date)": Provisioning finished" |tee -a /vagrant/vagrant_provision.log
+
+EOC
+   config.vm.provision :reload
+
+end
