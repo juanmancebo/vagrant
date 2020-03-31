@@ -3,7 +3,22 @@
 #cd -
 VM="xubuntu_1804"
 ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
-wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE
+ISOMD5="0c268a465d5f48a30e5b12676e9f1b36"
+if [ -f ${ISOFILE} ]
+then
+	echo "iso file already exists"
+	if [ $(md5sum ${ISOFILE}|awk '{print $1}') == ${ISOMD5} ]
+	then 
+		echo "md5 iso file ok"
+	else
+		echo "md5 iso file does not match. Downloading new one..."
+		rm -f ${ISOFILE}
+		wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE
+	fi
+else
+	echo "Downloading iso file..."
+	wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE
+fi
 vboxmanage createvm --name $VM --ostype "Ubuntu_64" --register
 vboxmanage storagectl $VM --name "IDE" --add ide
 vboxmanage storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium ${ISOFILE}
