@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -x
 
 VAGRANT_USER=vagrant
 VAGRANT_HOME=/home/$VAGRANT_USER
@@ -22,11 +22,11 @@ echo "UseDNS no" >> /etc/ssh/sshd_config
 
 # Install vagrant keys
 cd $VAGRANT_HOME
-mkdir .ssh
+mkdir -m 700 -p .ssh
 cd .ssh
 wget https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub -O authorized_keys
-#chown -R $VAGRANT_USER:$VAGRANT_USER $VAGRANT_HOME/.ssh
-#chmod 600 authorized_keys
+chown -R $VAGRANT_USER:$VAGRANT_USER $VAGRANT_HOME/.ssh
+chmod 600 authorized_keys
 
 
 date > /etc/vagrant_box_build_time
