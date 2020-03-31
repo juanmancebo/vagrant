@@ -1,12 +1,18 @@
-$VM="xubuntu_1804"
+$VM="xubuntu_1804_2"
 $ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
 $VBOXMANAGE="C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 
 $url = "http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE"
 $output = "$PSScriptRoot\$ISOFILE"
 $start_time = Get-Date
-(New-Object System.Net.WebClient).DownloadFile($url, $output)
-Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
+
+if(Test-Path -path $output)
+{
+	write-host("$output already exists")
+} else {
+	(New-Object System.Net. already existsWebClient).DownloadFile($url, $output)
+    Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
+} 
 
 
 & $VBOXMANAGE createvm --name $VM --ostype "Ubuntu_64" --register
