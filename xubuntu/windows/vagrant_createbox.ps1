@@ -1,6 +1,7 @@
-$VM="xubuntu_1804_2"
+$VM="xubuntu_1804"
 $ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
-$VBOXMANAGE="C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
+$PROGRAMFILES_PATH = Get-ChildItem Env:PROGRAMFILES | select -expand Value
+$VBOXMANAGE="$PROGRAMFILES_PATH\Oracle\VirtualBox\VBoxManage.exe"
 
 $url = "http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE"
 $output = "$PSScriptRoot\$ISOFILE"
@@ -14,6 +15,14 @@ if(Test-Path -path $output)
     Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 } 
 
+
+
+if (& $VBOXMANAGE list vms|findstr  \<$VM\>)
+{
+	
+	write-host("vm $VM already exists. Exiting...")
+	exit 1
+}
 
 & $VBOXMANAGE createvm --name $VM --ostype "Ubuntu_64" --register
 & $VBOXMANAGE storagectl $VM --name "IDE" --add ide
@@ -33,7 +42,8 @@ if(Test-Path -path $output)
 
 & $VBOXMANAGE startvm $VM --type headless
 
-Start-Sleep -s 600
+Start-Sleep -s 400
+$WAIT_SECONDS = 15
 $EXIT_STATUS = "False"
 $a=0
 $number = 120
@@ -41,18 +51,17 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 {
 
  "Starting Loop $a"
- & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/usr/bin/whoami'
+ & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --timeout 7000 --dos2unix --exe "/bin/bash" -- arg0 "-c" -- "/bin/grep -q 'Final exit code:' /var/log/vboxpostinstall.log  &&  /bin/echo 'OK.Unattended install finished'|| /bin/echo 'Unattended install not finished yet. Retrying in $WAIT_SECONDS seconds'"
  $EXIT_STATUS = !$?
- Start-Sleep -s 15
+ Start-Sleep -s $WAIT_SECONDS
  $a++
  "Now a is $a and number is $number"
 
 }
 
-
-& $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp arg1 "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
+#& $VBOXMANAGE guestcontrol $VM --username root --password vagrant copyto --target-directory /tmp ../../vagrant.sh
+& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/bin/bash' -- arg0 '/tmp/vagrant.sh'
-& $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/bin/rm' -- arg0 '/tmp/vagrant.sh'
 
 rm "$VM.box" -ea ig
 vagrant package --base $VM --output "$VM.box" $VM
