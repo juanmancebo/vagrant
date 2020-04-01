@@ -1,6 +1,5 @@
-#cd /usr/share/virtualbox
-#sudo ln -s /usr/lib/virtualbox/UnattendedTemplates/ UnattendedTemplates
-#cd -
+#!/bin/bash
+
 VM="xubuntu_1804"
 ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
 ISOMD5="0c268a465d5f48a30e5b12676e9f1b36"
@@ -38,7 +37,8 @@ vboxmanage unattended install $VM --iso=${ISOFILE} --user=vagrant --full-user-na
 vboxmanage startvm $VM --type headless
 
 ################
-sleep 600
+sleep 400
+WAIT_SECONDS=15
 EXIT_STATUS=1
 a=0
 number=120
@@ -46,22 +46,25 @@ number=120
 while [ $EXIT_STATUS -eq 1 ] && [ $a -le $number ]
 do
  echo "Starting Loop $a"
- vboxmanage guestcontrol $VM --verbose --username root --password vagrant run --exe '/usr/bin/whoami'
+ vboxmanage guestcontrol $VM --verbose --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- '/bin/grep -q "Final exit code:" /var/log/vboxpostinstall.log  &&  /bin/echo "OK.Unattended install finished"|| /bin/echo "Unattended install not finished yet. Retrying in ${WAIT_SECONDS} seconds"'
  EXIT_STATUS=$?
- sleep 15
+ sleep ${WAIT_SECONDS}
  a=$[$a+1]
  echo "Now a is $a and number is $number"
 done
 
 ##################
-
 echo "Executing post install scripts."
-vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
-vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '/tmp/vagrant.sh'
-vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/rm' -- arg0 '/tmp/vagrant.sh'
+vboxmanage guestcontrol $VM --username root --password vagrant copyto --target-directory /tmp ../../vagrant.sh 
+#vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
+echo $?
+vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/md5sum' -- arg0 '/tmp/vagrant.sh'
+echo $?
+vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && /tmp/vagrant.sh'
+echo $?
 
-if [ -f ${VM}.box ];then echo "Box file ${VM}.box already exists. Removing..." && rm -f ${VM}.box;fi
-vagrant package --base $VM --output ${VM}.box $VM
-vboxmanage unregistervm ${VM} --delete
-rm -rf  ~/VirtualBox\ VMs/${VM}
-vagrant box add ${VM}.box --name $VM --force
+#if [ -f ${VM}.box ];then echo "Box file ${VM}.box already exists. Removing..." && rm -f ${VM}.box;fi
+#vagrant package --base $VM --output ${VM}.box $VM
+#vboxmanage unregistervm ${VM} --delete
+#rm -rf  ~/VirtualBox\ VMs/${VM}
+#vagrant box add ${VM}.box --name $VM --force
