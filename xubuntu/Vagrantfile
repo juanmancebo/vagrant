@@ -110,9 +110,15 @@ Vagrant.configure("2") do |config|
      #configuring repos
      echo "Configuring repos..."
      DEBIAN_FRONTEND=noninteractive apt-get install -y curl
-     curl -s http://mirrors.ubuntu.com/mirrors.txt >/tmp/mirrors.txt && repos=$(grep -vw evowise /tmp/mirrors.txt|cut -d / -f3) && for repo in $repos ;do echo -e "\n$repo $(ping -q -c 2 -W 1 -i 0.5 $repo |tail -1|awk -F/ '{print $6}')";done |egrep [0-9][0-9].[0-9][0-9][0-9] |sort -k2n |tee /tmp/fastesthosts.txt
+     curl -s http://mirrors.ubuntu.com/mirrors.txt >/tmp/mirrors.txt
+     repos=$(grep -vw evowise /tmp/mirrors.txt|cut -d / -f3)
+     for repo in $repos ;do echo -e "\n$repo $(ping -q -c 2 -W 1 -i 0.5 $repo |tail -1|awk -F/ '{print $6}')";done |egrep [0-9][0-9].[0-9][0-9][0-9] |sort -k2n |tee /tmp/fastesthosts.txt
+     echo "fastest hosts sorted"
+     cat /tmp/fastesthosts.txt
      fastesthost=$(head -1 /tmp/fastesthosts.txt|cut -d " " -f1)
+     echo "fastest host is $fastesthost"
      fastestrepo=$(grep $fastesthost /tmp/mirrors.txt)
+     echo "fastest repo is $fastestrepo"
      mv /etc/apt/sources.list{,_default}
      echo "deb $fastestrepo $(lsb_release -cs) main restricted" >/etc/apt/sources.list
      echo "deb $fastestrepo $(lsb_release -cs)-updates main restricted" >>/etc/apt/sources.list
