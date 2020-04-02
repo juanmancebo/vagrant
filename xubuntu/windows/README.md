@@ -1,3 +1,7 @@
+### Open Powershell
+```
+(Windows logo key  + R) and type powershell
+```
 
 ### Give permissions to execute script
 ```
