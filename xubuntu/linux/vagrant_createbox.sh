@@ -18,6 +18,16 @@ else
 	echo "Downloading iso file..."
 	wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE
 fi
+
+if vboxmanage list vms|grep -qw $VM
+then
+	echo "vm $VM already exists. Exiting..."
+	exit 1
+fi
+
+
+
+
 vboxmanage createvm --name $VM --ostype "Ubuntu_64" --register
 vboxmanage storagectl $VM --name "IDE" --add ide
 vboxmanage storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium ${ISOFILE}
@@ -55,16 +65,14 @@ done
 
 ##################
 echo "Executing post install scripts."
-vboxmanage guestcontrol $VM --username root --password vagrant copyto --target-directory /tmp ../../vagrant.sh 
-#vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
-echo $?
-vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/md5sum' -- arg0 '/tmp/vagrant.sh'
-echo $?
-vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && /tmp/vagrant.sh'
-echo $?
+vboxmanage guestcontrol $VM --username root --password vagrant copyto --target-directory /tmp/vagrant_tmp.sh ../../vagrant.sh
+#& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
+vboxmanage guestcontrol $VM --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "tr -d '\r' < /tmp/vagrant_tmp.sh > /tmp/vagrant.sh"
+vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && md5sum /tmp/vagrant.sh && /tmp/vagrant.sh'
+VBoxManage controlvm $VM acpipowerbutton
 
 if [ -f ${VM}.box ];then echo "Box file ${VM}.box already exists. Removing..." && rm -f ${VM}.box;fi
 vagrant package --base $VM --output ${VM}.box $VM
+vagrant box add ${VM}.box --name $VM --force
 vboxmanage unregistervm ${VM} --delete
 rm -rf  ~/VirtualBox\ VMs/${VM}
-vagrant box add ${VM}.box --name $VM --force
