@@ -236,7 +236,7 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 #rancher cli install
 sudo curl -sL https://github.com/rancher/cli/releases/download/v2.3.2/rancher-linux-amd64-v2.3.2.tar.gz -o /tmp/rancher-cli.tar.gz
-sudo tar xvfz /tmp/rancher-cli.tar.gz -C /tmp
+sudo tar xvf /tmp/rancher-cli.tar.gz -C /tmp
 sudo mv /tmp/rancher*/rancher /usr/local/bin/
 sudo chmod +x /usr/local/bin/rancher
 
