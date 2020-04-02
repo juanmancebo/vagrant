@@ -63,6 +63,7 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 #& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "tr -d '\r' < /tmp/vagrant_tmp.sh > /tmp/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && /tmp/vagrant.sh'
+& $VBOXMANAGE controlvm $VM acpipowerbutton
 
 rm "$VM.box" -ea ig
 vagrant package --base $VM --output "$VM.box" $VM
