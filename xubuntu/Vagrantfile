@@ -229,13 +229,13 @@ echo 'source <(kubectl completion bash)' >>~/.bashrc
 
 #helm3 install
 helm_version=helm-v3.1.2-linux-amd64.tar.gz
-sudo curl -L https://get.helm.sh/$helm_version -o /tmp/$helm_version
+sudo curl -sL https://get.helm.sh/$helm_version -o /tmp/$helm_version
 sudo tar -zxvf /tmp/$helm_version -C /tmp
 sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm
 helm3 repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 #rancher cli install
-sudo curl -L https://github.com/rancher/cli/releases/download/v2.3.2/rancher-linux-amd64-v2.3.2.tar.gz -o /tmp/rancher-cli.tar.gz
+sudo curl -sL https://github.com/rancher/cli/releases/download/v2.3.2/rancher-linux-amd64-v2.3.2.tar.gz -o /tmp/rancher-cli.tar.gz
 sudo tar xvfz /tmp/rancher-cli.tar.gz -C /tmp
 sudo mv /tmp/rancher*/rancher /usr/local/bin/
 sudo chmod +x /usr/local/bin/rancher
