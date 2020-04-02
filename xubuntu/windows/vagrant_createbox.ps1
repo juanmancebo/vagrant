@@ -67,6 +67,6 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 
 rm "$VM.box" -ea ig
 vagrant package --base $VM --output "$VM.box" $VM
+vagrant box add "$VM.box" --name $VM --force
 & $VBOXMANAGE unregistervm $VM --delete
 rm "$HOME\VirtualBox VMs\$VM" -r -ea ig
-vagrant box add "$VM.box" --name $VM --force
