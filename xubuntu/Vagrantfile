@@ -110,7 +110,7 @@ Vagrant.configure("2") do |config|
      #configuring repos
      echo "Configuring repos..."
      DEBIAN_FRONTEND=noninteractive apt-get install -y curl
-     curl -s http://mirrors.ubuntu.com/mirrors.txt >/tmp/mirrors.txt && repos=$(cat /tmp/mirrors.txt|cut -d / -f3) && for repo in $repos ;do echo -e "\n$repo $(ping -q -c 2 -W 1 -i 0.5 $repo |tail -1|awk -F/ '{print $6}')";done |egrep [0-9][0-9].[0-9][0-9][0-9] |sort -k2n
+     curl -s http://mirrors.ubuntu.com/mirrors.txt >/tmp/mirrors.txt && repos=$(grep -vw evowise /tmp/mirrors.txt|cut -d / -f3) && for repo in $repos ;do echo -e "\n$repo $(ping -q -c 2 -W 1 -i 0.5 $repo |tail -1|awk -F/ '{print $6}')";done |egrep [0-9][0-9].[0-9][0-9][0-9] |sort -k2n
      fastesthost=$(echo $repos|head -1|cut -d " " -f1)
      fastestrepo=$(grep $fastesthost /tmp/mirrors.txt)
      mv /etc/apt/sources.list{,_default}
