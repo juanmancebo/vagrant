@@ -51,7 +51,7 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 {
 
  "Starting Loop $a"
- & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --timeout 7000 --dos2unix --exe "/bin/bash" -- arg0 "-c" -- "/bin/grep -q 'Final exit code:' /var/log/vboxpostinstall.log  &&  /bin/echo 'OK.Unattended install finished'|| /bin/echo 'Unattended install not finished yet. Retrying in $WAIT_SECONDS seconds'"
+ & $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "/bin/grep -q 'Final exit code:' /var/log/vboxpostinstall.log  &&  /bin/echo 'OK.Unattended install finished'|| /bin/echo 'Unattended install not finished yet. Retrying in $WAIT_SECONDS seconds'"
  $EXIT_STATUS = !$?
  Start-Sleep -s $WAIT_SECONDS
  $a++
@@ -59,9 +59,10 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 
 }
 
-#& $VBOXMANAGE guestcontrol $VM --username root --password vagrant copyto --target-directory /tmp ../../vagrant.sh
-& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
-& $VBOXMANAGE guestcontrol $VM --verbose --username root --password vagrant run --exe '/bin/bash' -- arg0 '/tmp/vagrant.sh'
+& $VBOXMANAGE guestcontrol $VM --username root --password vagrant copyto --target-directory /tmp/vagrant_tmp.sh ../../vagrant.sh
+#& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
+& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "tr -d '\r' < /tmp/vagrant_tmp.sh > /tmp/vagrant.sh"
+& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && /tmp/vagrant.sh'
 
 rm "$VM.box" -ea ig
 vagrant package --base $VM --output "$VM.box" $VM
