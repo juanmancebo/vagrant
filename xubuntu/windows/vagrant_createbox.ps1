@@ -64,6 +64,7 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 & $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "tr -d '\r' < /tmp/vagrant_tmp.sh > /tmp/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && /tmp/vagrant.sh'
 & $VBOXMANAGE controlvm $VM acpipowerbutton
+& $VBOXMANAGE storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "none"
 
 rm "$VM.box" -ea ig
 vagrant package --base $VM --output "$VM.box" $VM

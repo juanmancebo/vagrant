@@ -70,6 +70,7 @@ vboxmanage guestcontrol $VM --username root --password vagrant copyto --target-d
 vboxmanage guestcontrol $VM --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "tr -d '\r' < /tmp/vagrant_tmp.sh > /tmp/vagrant.sh"
 vboxmanage guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && md5sum /tmp/vagrant.sh && /tmp/vagrant.sh'
 VBoxManage controlvm $VM acpipowerbutton
+VBoxManage storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "none"
 
 if [ -f ${VM}.box ];then echo "Box file ${VM}.box already exists. Removing..." && rm -f ${VM}.box;fi
 vagrant package --base $VM --output ${VM}.box $VM
