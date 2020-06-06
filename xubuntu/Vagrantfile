@@ -143,7 +143,7 @@ Vagrant.configure("2") do |config|
      DEBIAN_FRONTEND=noninteractive snap install rocketchat-desktop
      #https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/2.17.7/rocketchat_2.17.7_amd64.deb
      #cloudformation linter
-     DEBIAN_FRONTEND=noninteractive pip install cfn-lint
+     DEBIAN_FRONTEND=noninteractive pip3 install cfn-lint
      #install google-chrome. https://www.google.com/linuxrepositories/
      wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add -
      echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
