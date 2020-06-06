@@ -12,13 +12,13 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.define "xubuntu_1804" do |v|
-    v.vm.box = "xubuntu_1804"
+  config.vm.define "xubuntu_2004" do |v|
+    v.vm.box = "xubuntu_2004"
   end
   config.vm.hostname = "xubuntu"
   #config.disksize.size = '20GB'
   config.vm.provider "virtualbox" do |v|
-    v.name = "xubuntu_1804"
+    v.name = "xubuntu_2004"
   end
 
   # Disable automatic box update checking. If you disable this, then
@@ -138,7 +138,7 @@ Vagrant.configure("2") do |config|
      DEBIAN_FRONTEND=noninteractive apt-get update
      DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io
      #install tools
-     DEBIAN_FRONTEND=noninteractive apt-get install -y vim git terminator tmux libreoffice pidgin mlocate traceroute whois python-pip shutter keychain cifs-utils keepassxc p7zip-full jq ldap-utils
+     DEBIAN_FRONTEND=noninteractive apt-get install -y vim git terminator tmux libreoffice pidgin mlocate traceroute whois python3-pip keychain cifs-utils keepassxc p7zip-full jq ldap-utils
      #rocketchat desktop client
      DEBIAN_FRONTEND=noninteractive snap install rocketchat-desktop
      #https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/2.17.7/rocketchat_2.17.7_amd64.deb

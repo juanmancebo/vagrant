@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VM="xubuntu_1804"
-ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
-ISOMD5="0c268a465d5f48a30e5b12676e9f1b36"
+VM="xubuntu_2004"
+ISOFILE="xubuntu-20.04-desktop-amd64.iso"
+ISOMD5="c8977ce50d175dfce8e309dcaef8f1b3"
 if [ -f ${ISOFILE} ]
 then
 	echo "iso file already exists"
@@ -12,11 +12,11 @@ then
 	else
 		echo "md5 iso file does not match. Downloading new one..."
 		rm -f ${ISOFILE}
-		wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE
+		wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/20.04/release/$ISOFILE
 	fi
 else
 	echo "Downloading iso file..."
-	wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE
+	wget http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/20.04/release/$ISOFILE
 fi
 
 if vboxmanage list vms|grep -qw $VM

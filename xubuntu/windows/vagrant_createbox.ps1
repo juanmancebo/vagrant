@@ -1,18 +1,19 @@
-$VM="xubuntu_1804"
-$ISOFILE="xubuntu-18.04.3-desktop-amd64.iso"
+$VM="xubuntu_2004"
+$ISOFILE="xubuntu-20.04-desktop-amd64.iso"
 $PROGRAMFILES_PATH = Get-ChildItem Env:PROGRAMFILES | select -expand Value
 $VBOXMANAGE="$PROGRAMFILES_PATH\Oracle\VirtualBox\VBoxManage.exe"
 
-$url = "http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/18.04/release/$ISOFILE"
-$output = "$PSScriptRoot\$ISOFILE"
-$start_time = Get-Date
+$URI = "http://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/20.04/release/$ISOFILE"
+$OUTPUT = "$PSScriptRoot\$ISOFILE"
+$START_TIME = Get-Date
 
-if(Test-Path -path $output)
+if(Test-Path -path $OUTPUT)
 {
-	write-host("$output already exists")
+	write-host("$OUTPUT already exists")
 } else {
-	(New-Object System.Net. already existsWebClient).DownloadFile($url, $output)
-    Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
+    write-host("Downloading $URI to $OUTPUT")
+    (New-Object System.Net.WebClient).DownloadFile($URI, $OUTPUT)
+    Write-Output "Time taken: $((Get-Date).Subtract($START_TIME).Seconds) second(s)"
 } 
 
 
@@ -20,10 +21,11 @@ if(Test-Path -path $output)
 if (& $VBOXMANAGE list vms|findstr  \<$VM\>)
 {
 	
-	write-host("vm $VM already exists. Exiting...")
+	write-host("VM $VM already exists. Exiting...")
 	exit 1
 }
 
+Write-Output "VM $VM setup started"
 & $VBOXMANAGE createvm --name $VM --ostype "Ubuntu_64" --register
 & $VBOXMANAGE storagectl $VM --name "IDE" --add ide
 & $VBOXMANAGE storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium $ISOFILE
@@ -63,11 +65,32 @@ while (($EXIT_STATUS -eq "False") -and ($a -le $number))
 #& $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/usr/bin/wget' -- arg0 -P /tmp "https://raw.githubusercontent.com/juanmancebo/vagrant/master/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe "/bin/bash" -- arg0 "-c" -- "tr -d '\r' < /tmp/vagrant_tmp.sh > /tmp/vagrant.sh"
 & $VBOXMANAGE guestcontrol $VM --username root --password vagrant run --exe '/bin/bash' -- arg0 '-c' -- 'chmod +x /tmp/vagrant.sh && /tmp/vagrant.sh'
+Write-Output "Powering off VM $VM"
 & $VBOXMANAGE controlvm $VM acpipowerbutton
-& $VBOXMANAGE storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "none"
+$WAIT_SECONDS = 3
+$EXIT_STATUS = "False"
+$a=0
+$number = 10
+while (($EXIT_STATUS -eq "False") -and ($a -le $number))
+{
 
+ "Starting Loop $a"
+ & $VBOXMANAGE showvminfo $VM --machinereadable |findstr 'VMState=\"poweroff\"'
+ $EXIT_STATUS = !$?
+ Start-Sleep -s $WAIT_SECONDS
+ $a++
+
+}
+Write-Output "VM $VM powered off"
+& $VBOXMANAGE storageattach $VM --storagectl "IDE" --port 1 --device 0 --type dvddrive --medium "none"
+Write-Output "VM $VM setup finished"
 rm "$VM.box" -ea ig
+Write-Output "Vagrant box $VM.box package started"
 vagrant package --base $VM --output "$VM.box" $VM
+Write-Output "Vagrant box $VM.box package finished"
 vagrant box add "$VM.box" --name $VM --force
+Write-Output "Cleaning up environment"
 & $VBOXMANAGE unregistervm $VM --delete
 rm "$HOME\VirtualBox VMs\$VM" -r -ea ig
+Write-Output "Script finished"
+Write-Output "Time taken: $((Get-Date).Subtract($START_TIME).Seconds) second(s)"
