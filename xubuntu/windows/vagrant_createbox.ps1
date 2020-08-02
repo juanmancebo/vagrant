@@ -1,4 +1,4 @@
-$VM="xubuntu_2004"
+$VM="xubuntu"
 $ISOFILE="xubuntu-20.04-desktop-amd64.iso"
 $PROGRAMFILES_PATH = Get-ChildItem Env:PROGRAMFILES | select -expand Value
 $VBOXMANAGE="$PROGRAMFILES_PATH\Oracle\VirtualBox\VBoxManage.exe"

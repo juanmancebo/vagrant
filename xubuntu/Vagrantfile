@@ -12,13 +12,13 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.define "xubuntu_2004" do |v|
-    v.vm.box = "xubuntu_2004"
+  config.vm.define "xubuntu" do |v|
+    v.vm.box = "xubuntu"
   end
   config.vm.hostname = "xubuntu"
   #config.disksize.size = '20GB'
   config.vm.provider "virtualbox" do |v|
-    v.name = "xubuntu_2004"
+    v.name = "xubuntu"
   end
 
   # Disable automatic box update checking. If you disable this, then
